@@ -3,9 +3,9 @@
  * Plugin Name:       Royal Mail Shipping Calculator for WooCommerce
  * Plugin URI:        https://wpruby.com
  * Description:       Royal Mail Shipping Calculator for WooCommerce
- * Version:           1.9.5
+ * Version:           1.9.9
  * WC requires at least: 5.0
- * WC tested up to: 10.1
+ * WC tested up to: 10.3
  * Author:            WPRuby
  * Author URI:        https://wpruby.com
  * Text Domain:       wc-royal-mail
@@ -31,10 +31,26 @@ class WPRuby_RoyalMail_Lite {
 		}
 
 		add_filter('woocommerce_shipping_methods', [$this, 'add_royal_mail_method']);
+        add_action('wp_ajax_dismiss_royalmail_rulehook_notice', [$this, 'dismiss_royalmail_rulehook_promo']);
 
 	}
 
-	/**
+    /**
+     * Handle the AJAX request to dismiss the RuleHook promo
+     */
+    public function dismiss_royalmail_rulehook_promo() {
+        check_ajax_referer('rulehook_royalmail_dismiss_nonce', 'security');
+
+        if (current_user_can('manage_options')) {
+            // Store the current timestamp as the dismissed time
+            update_user_meta(get_current_user_id(), 'rulehook_royalmail_promo_dismissed', time());
+        }
+
+        wp_die();
+    }
+
+
+    /**
 	 * Add the shipping method to WooCommerce
 	 * */
 	public function add_royal_mail_method( $methods )
